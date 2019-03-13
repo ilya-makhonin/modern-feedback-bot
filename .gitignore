@@ -1,0 +1,6 @@
+.idea/
+config.py
+*/config.py
+venv/
+*.pem
+*.key
