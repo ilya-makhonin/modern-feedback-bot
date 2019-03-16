@@ -35,8 +35,8 @@ def start(use_webhook=False, **webhook_data):
         if use_webhook:
             server = flask_init(bot_object)
             server.run(host=LISTEN, port=PORT, ssl_context=(CERT, KEY))
-            return True
-        return False
+        else:
+            bot_object.polling(none_stop=True, interval=.5)
     except Exception as err:
         logger_main.warning('bot crashed')
         logger_main.warning(err.with_traceback(None))
@@ -44,7 +44,7 @@ def start(use_webhook=False, **webhook_data):
 
 if __name__ == '__main__':
     try:
-        app = start(use_webhook=True, webhook_ip=HOST, webhook_port=PORT, token=TOKEN, ssl_cert=CERT)
+        start(use_webhook=True, webhook_ip=HOST, webhook_port=PORT, token=TOKEN, ssl_cert=CERT)
     except Exception as error:
         logger_main.warning(error.with_traceback(None))
         print(error)
