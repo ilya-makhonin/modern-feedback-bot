@@ -3,6 +3,8 @@ import sql
 from log import log
 from constants import *
 from config import TOKEN, CHAT
+from time import sleep
+import logging
 
 
 bot = telebot.TeleBot(TOKEN)
@@ -106,4 +108,12 @@ def text_handler(message: telebot.types.Message):
 
 
 def create_bot_instance(use_webhook=True, logging_enable=True, webhook_data=dict):
+    if logging_enable:
+        telebot.logger.setLevel(logging.getLevelName('DEBUG'))
+
+    if use_webhook:
+        bot.remove_webhook()
+        sleep(1)
+        bot.set_webhook(url=None, certificate=None)
+
     return bot
