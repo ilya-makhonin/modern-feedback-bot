@@ -22,4 +22,3 @@ def log(name='main', file='logs.log', level='DEBUG'):
     logger.addHandler(file_handler)
 
     return logger
-
