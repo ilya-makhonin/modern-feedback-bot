@@ -3,7 +3,6 @@ import sql
 from log import log
 from constants import *
 from config import TOKEN, CHAT
-from time import sleep
 import logging
 
 
@@ -107,13 +106,7 @@ def text_handler(message: telebot.types.Message):
         logger.info(f"Exception in text handler. Info: {error.with_traceback(None)}")
 
 
-def create_bot_instance(use_webhook=True, logging_enable=True, webhook_data=dict):
+def create_bot_instance(logging_enable=True):
     if logging_enable:
         telebot.logger.setLevel(logging.getLevelName('DEBUG'))
-
-    if use_webhook:
-        bot.remove_webhook()
-        sleep(1)
-        bot.set_webhook(url=None, certificate=None)
-
     return bot
