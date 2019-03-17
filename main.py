@@ -11,7 +11,7 @@ logger_main = log('main', './logs/main.log', 'WARNING')
 
 def flask_init(bot_object):
     web_hook_app = flask.Flask(__name__)
-    url_path = "/%s/" % (TOKEN,)
+    url_path = f"/{TOKEN}/"
 
     @web_hook_app.route('/', methods=['GET', 'HEAD'])
     def index():
@@ -30,11 +30,11 @@ def flask_init(bot_object):
     return web_hook_app
 
 
-def main(use_web_hook, logging_enable):
+def main(use_web_hook, logging_enable, logging_level):
     try:
-        bot = create_bot_instance(logging_enable)
+        bot = create_bot_instance(logging_enable, logging_level)
         if use_web_hook:
-            url = 'https://%s:%s/%s/' % (HOST, PORT, TOKEN)
+            url = f"https://{HOST}:{PORT}/{TOKEN}/"
             bot.remove_webhook()
             sleep(1)
             bot.set_webhook(url=url, certificate=open(CERT, 'r'))
@@ -49,7 +49,7 @@ def main(use_web_hook, logging_enable):
 
 if __name__ == '__main__':
     try:
-        main(use_web_hook=True, logging_enable=True)
+        main(use_web_hook=True, logging_enable=True, logging_level='DEBUG')
     except Exception as error:
         logger_main.warning(error.with_traceback(None))
         print(error)
