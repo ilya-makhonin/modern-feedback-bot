@@ -2,6 +2,7 @@ from bot import create_bot_instance
 from log import log
 import telebot
 import flask
+from time import sleep
 from config import *
 
 
@@ -29,14 +30,18 @@ def flask_init(bot_object):
     return web_hook_app
 
 
-def start(use_webhook=False, **webhook_data):
+def main(use_web_hook, logging_enable):
     try:
-        bot_object = create_bot_instance(webhook_data=webhook_data, use_webhook=use_webhook, logging_enable=True)
-        if use_webhook:
-            server = flask_init(bot_object)
+        bot = create_bot_instance(logging_enable)
+        if use_web_hook:
+            url = 'https://%s:%s/%s/' % (HOST, PORT, TOKEN)
+            bot.remove_webhook()
+            sleep(1)
+            bot.set_webhook(url=url, certificate=open(CERT, 'r'))
+            server = flask_init(bot)
             server.run(host=LISTEN, port=PORT, ssl_context=(CERT, KEY))
         else:
-            bot_object.polling(none_stop=True, interval=.5)
+            bot.polling(none_stop=True, interval=.5)
     except Exception as err:
         logger_main.warning('bot crashed')
         logger_main.warning(err.with_traceback(None))
@@ -44,7 +49,7 @@ def start(use_webhook=False, **webhook_data):
 
 if __name__ == '__main__':
     try:
-        start(use_webhook=True, webhook_ip=HOST, webhook_port=PORT, token=TOKEN, ssl_cert=CERT)
+        main(use_web_hook=True, logging_enable=True)
     except Exception as error:
         logger_main.warning(error.with_traceback(None))
         print(error)
