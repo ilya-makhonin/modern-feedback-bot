@@ -14,11 +14,11 @@ logger = log('bot', 'bot.log', 'INFO')
 def start_handler(message: telebot.types.Message):
     adding = sql.add_user(
         message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
-    if adding:
-        bot.send_message(message.from_user.id, start_mess)
-        logger.info(f"It's start handler. User {message.from_user.id} had added to the bot")
+    if not adding:
+        sql.sql_log.error(f"Error in start handler! User {message.from_user.id} did not have added to the bot")
         return
-    sql.sql_log.error(f"Error in start handler! User {message.from_user.id} did not have added to the bot")
+    bot.send_message(message.from_user.id, start_mess)
+    logger.info(f"It's start handler. User {message.from_user.id} had added to the bot")
 
 
 @bot.message_handler(commands=['help'])
@@ -30,8 +30,17 @@ def help_handler(message: telebot.types.Message):
 @bot.message_handler(commands=['user_count'])
 def get_user_count(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /user_count command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /user_count command: {message.from_user.id}")
+        return
     if message.from_user.id in sql.get_admins():
         user_count = sql.user_count()
+        if not user_count:
+            bot.send_message(message.from_user.id, user_count_error)
+            logger.info(f"Error getting user's count. User which to send /user_count command: {message.from_user.id}")
+            return
         bot.send_message(message.from_user.id, count_mess.format(user_count))
         logger.info(f"User {message.from_user.id} had gotten user's count. Result: {user_count}")
 
@@ -39,10 +48,19 @@ def get_user_count(message: telebot.types.Message):
 @bot.message_handler(commands=['global'])
 def global_mailing(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /global command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /global command: {message.from_user.id}")
+        return
     if message.from_user.id in sql.get_admins():
         text = (message.text[7:]).strip()
         deleted_user = 0
         users = sql.get_users()
+        if not users:
+            bot.send_message(message.from_user.id, get_user_error)
+            logger.info(f"Error getting list of users. User which to send /global command: {message.from_user.id}")
+            return
         for user in users:
             try:
                 bot.send_message(user, text)
