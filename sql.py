@@ -18,10 +18,10 @@ def add_user(user_id, first_name, last_name, username):
             if cursor.fetchone() is None:
                 if username is not None and len(username) > 35:
                     username = username[0:35]
-                if first_name is not None and len(first_name) > 100:
-                    first_name = first_name[0:100]
-                if last_name is not None and len(last_name) > 100:
-                    last_name = last_name[0:100]
+                if first_name is not None and len(first_name) > 50:
+                    first_name = first_name[0:35]
+                if last_name is not None and len(last_name) > 50:
+                    last_name = last_name[0:35]
                 cursor.execute(
                     'INSERT INTO `users` (user_id, username, first_name, last_name) VALUES (%s, %s, %s, %s);',
                     (user_id, username, first_name, last_name))
@@ -51,7 +51,7 @@ def get_users():
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT username FROM users;')
+            cursor.execute('SELECT user_id FROM users;')
             users = cursor.fetchall()
             return [user[0] for user in users]
     except Exception as error:
