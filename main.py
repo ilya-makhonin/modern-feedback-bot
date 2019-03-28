@@ -1,5 +1,6 @@
-from bot import create_bot_instance
+from bot import create_bot_instance, hidden_forward
 from log import log
+import threading
 import telebot
 import flask
 from time import sleep
@@ -7,6 +8,15 @@ from config import *
 
 
 logger_main = log('main', './logs/main.log', 'WARNING')
+
+
+def update_cache(timeout: int):
+    try:
+        while True:
+            sleep(timeout)
+            hidden_forward.clear_data()
+    except Exception as err:
+        logger_main.warning(err.with_traceback(None))
 
 
 def flask_init(bot_object):
@@ -42,14 +52,15 @@ def main(use_web_hook, logging_enable, logging_level):
             server.run(host=LISTEN, port=PORT, ssl_context=(CERT, KEY))
         else:
             bot.polling(none_stop=True, interval=.5)
-    except Exception as err:
+        timeout = 14400 if hidden_forward.get_mode() else 30
+        thread = threading.Thread(target=update_cache, name='CacheThread', args=[timeout])
+        thread.setDaemon(True)
+        thread.start()
+    except Exception as error:
+        print(error)
         logger_main.warning('bot crashed')
-        logger_main.warning(err.with_traceback(None))
+        logger_main.warning(error.with_traceback(None))
 
 
 if __name__ == '__main__':
-    try:
-        main(use_web_hook=True, logging_enable=True, logging_level='DEBUG')
-    except Exception as error:
-        logger_main.warning(error.with_traceback(None))
-        print(error)
+    main(use_web_hook=True, logging_enable=True, logging_level='DEBUG')
