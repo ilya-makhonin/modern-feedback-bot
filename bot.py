@@ -9,7 +9,7 @@ import logging
 
 bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
-hidden_forward = Forward()
+hidden_forward = Forward(True)
 
 
 @bot.message_handler(commands=['start'])
