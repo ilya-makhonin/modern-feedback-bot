@@ -3,11 +3,13 @@ import sql
 from log import log
 from constants import *
 from config import TOKEN, CHAT
+from forward import Forward
 import logging
 
 
 bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
+hidden_forward = Forward()
 
 
 @bot.message_handler(commands=['start'])
@@ -80,6 +82,7 @@ def sticker_handler(message: telebot.types.Message):
             bot.send_sticker(message.reply_to_message.forward_from.id, message.sticker.file_id)
             logger.info(f"Sticker handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
             bot.reply_to(message, success_mess)
             logger.info(f"Sticker handler. Message from a user. Info: {message}")
@@ -94,6 +97,7 @@ def images_handler(message: telebot.types.Message):
             bot.send_photo(message.reply_to_message.forward_from.id, message.photo[-1].file_id)
             logger.info(f"Photo handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
             bot.reply_to(message, success_mess)
             logger.info(f"Image handler. Message from a user. Info: {message}")
@@ -108,6 +112,7 @@ def file_handler(message: telebot.types.Message):
             bot.send_document(message.reply_to_message.forward_from.id, message.document.file_id)
             logger.info(f"Document handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
             bot.reply_to(message, success_mess)
             logger.info(f"File handler. Message from a user. Info: {message}")
@@ -122,6 +127,7 @@ def audio_handler(message: telebot.types.Message):
             bot.send_audio(message.reply_to_message.forward_from.id, message.audio.file_id)
             logger.info(f"Audio handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.send_audio(CHAT, message.audio.file_id,
                            caption=info_mess.format(message.from_user.first_name, message.from_user.username),
                            reply_to_message_id=message.from_user.id)
@@ -138,6 +144,7 @@ def voice_handler(message: telebot.types.Message):
             bot.send_voice(message.reply_to_message.forward_from.id, message.voice.file_id)
             logger.info(f"Voice handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
             bot.reply_to(message, success_mess)
             logger.info(f"Voice handler. Message from a user. Info: {message}")
@@ -152,6 +159,7 @@ def text_handler(message: telebot.types.Message):
             bot.send_message(message.reply_to_message.forward_from.id, message.text)
             logger.info(f"Text handler. In CHAT. Info: {message}")
         else:
+            hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
             bot.reply_to(message, success_mess)
             logger.info(f"Text handler. Message from a user. Info: {message}")
