@@ -40,7 +40,7 @@ def helping_handler(message: telebot.types.Message):
         logger.info(f"Error getting list of admins. User which to send /helping command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
-        bot.send_message(message.from_user.id, help_mess)
+        bot.send_message(message.from_user.id, helping_mess)
         logger.info(f"It's helping handler. Message from user {message.from_user.id}")
 
 
