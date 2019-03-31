@@ -5,6 +5,8 @@ from constants import *
 from config import TOKEN, CHAT
 from forward import Forward
 import logging
+import json
+import os
 
 
 bot = telebot.TeleBot(TOKEN)
@@ -27,6 +29,19 @@ def start_handler(message: telebot.types.Message):
 def help_handler(message: telebot.types.Message):
     bot.send_message(message.from_user.id, help_mess)
     logger.info(f"It's help handler. Message from user {message.from_user.id}")
+
+
+@bot.message_handler(commands=['helping'])
+def helping_handler(message: telebot.types.Message):
+    logger.info(f"User {message.from_user.id} had entered /helping command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /helping command: {message.from_user.id}")
+        return
+    if message.from_user.id in sql.get_admins():
+        bot.send_message(message.from_user.id, help_mess)
+        logger.info(f"It's helping handler. Message from user {message.from_user.id}")
 
 
 @bot.message_handler(commands=['user_count'])
@@ -75,11 +90,36 @@ def global_mailing(message: telebot.types.Message):
         logger.info(f"User {message.from_user.id} had sent global mailing. Text: {text}. Deleted user: {deleted_user}")
 
 
+@bot.message_handler(commands=['getfullcache'])
+def get_cache(message: telebot.types.Message):
+    logger.info(f"User {message.from_user.id} had entered /getfullcache command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /getfullcache command: {message.from_user.id}")
+        return
+    if message.from_user.id in sql.get_admins():
+        try:
+            if not os.path.exists('logs/'):
+                os.mkdir('./cache/')
+            with open('./cache/file.txt', 'w', encoding='utf8') as cache:
+                json.dump(hidden_forward.message_forward_data, cache, ensure_ascii=False, indent=2)
+                bot.send_document(message.from_user.id, cache)
+            logger.info(
+                f"User {message.from_user.id} had gotten cache data. Result: {hidden_forward.message_forward_data}")
+        except Exception as error:
+            logger.info(error.with_traceback(None))
+
+
 @bot.message_handler(content_types=['sticker'])
 def sticker_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_sticker(message.reply_to_message.forward_from.id, message.sticker.file_id)
+            if message.reply_to_message.forward_from is None:
+                bot.send_sticker(hidden_forward.get_id(message), message.sticker.file_id)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_sticker(message.reply_to_message.forward_from.id, message.sticker.file_id)
             logger.info(f"Sticker handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
@@ -94,7 +134,11 @@ def sticker_handler(message: telebot.types.Message):
 def images_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_photo(message.reply_to_message.forward_from.id, message.photo[-1].file_id)
+            if message.reply_to_message.forward_from is None:
+                bot.send_photo(hidden_forward.get_id(message), message.photo[-1].file_id)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_photo(message.reply_to_message.forward_from.id, message.photo[-1].file_id)
             logger.info(f"Photo handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
@@ -109,7 +153,11 @@ def images_handler(message: telebot.types.Message):
 def file_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_document(message.reply_to_message.forward_from.id, message.document.file_id)
+            if message.reply_to_message.forward_from is None:
+                bot.send_document(hidden_forward.get_id(message), message.document.file_id)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_document(message.reply_to_message.forward_from.id, message.document.file_id)
             logger.info(f"Document handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
@@ -124,7 +172,11 @@ def file_handler(message: telebot.types.Message):
 def audio_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_audio(message.reply_to_message.forward_from.id, message.audio.file_id)
+            if message.reply_to_message.forward_from is None:
+                bot.send_audio(hidden_forward.get_id(message), message.audio.file_id)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_audio(message.reply_to_message.forward_from.id, message.audio.file_id)
             logger.info(f"Audio handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
@@ -141,7 +193,11 @@ def audio_handler(message: telebot.types.Message):
 def voice_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_voice(message.reply_to_message.forward_from.id, message.voice.file_id)
+            if message.reply_to_message.forward_from is None:
+                bot.send_voice(hidden_forward.get_id(message), message.voice.file_id)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_voice(message.reply_to_message.forward_from.id, message.voice.file_id)
             logger.info(f"Voice handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
@@ -156,7 +212,11 @@ def voice_handler(message: telebot.types.Message):
 def text_handler(message: telebot.types.Message):
     try:
         if message.chat.id == int(CHAT):
-            bot.send_message(message.reply_to_message.forward_from.id, message.text)
+            if message.reply_to_message.forward_from is None:
+                bot.send_message(hidden_forward.get_id(message), message.text)
+            else:
+                hidden_forward.delete_data(message)
+                bot.send_message(message.reply_to_message.forward_from.id, message.text)
             logger.info(f"Text handler. In CHAT. Info: {message}")
         else:
             hidden_forward.add_key(message)
