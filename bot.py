@@ -14,6 +14,14 @@ logger = log('bot', 'bot.log', 'INFO')
 hidden_forward = Forward(True)
 
 
+"""
+def get_user_id(message):
+    if message.reply_to_message.forward_from is None:
+        pass
+    return message.reply_to_message.forward_from.id
+"""
+
+
 @bot.message_handler(commands=['start'])
 def start_handler(message: telebot.types.Message):
     adding = sql.add_user(
@@ -44,19 +52,19 @@ def helping_handler(message: telebot.types.Message):
         logger.info(f"It's helping handler. Message from user {message.from_user.id}")
 
 
-@bot.message_handler(commands=['user_count'])
+@bot.message_handler(commands=['usercount'])
 def get_user_count(message: telebot.types.Message):
-    logger.info(f"User {message.from_user.id} had entered /user_count command")
+    logger.info(f"User {message.from_user.id} had entered /usercount command")
     admins = sql.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
-        logger.info(f"Error getting list of admins. User which to send /user_count command: {message.from_user.id}")
+        logger.info(f"Error getting list of admins. User which to sent /usercount command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
         user_count = sql.user_count()
         if not user_count:
             bot.send_message(message.from_user.id, user_count_error)
-            logger.info(f"Error getting user's count. User which to send /user_count command: {message.from_user.id}")
+            logger.info(f"Error getting user's count. User which to sent /usercount command: {message.from_user.id}")
             return
         bot.send_message(message.from_user.id, count_mess.format(user_count))
         logger.info(f"User {message.from_user.id} had gotten user's count. Result: {user_count}")
@@ -109,6 +117,33 @@ def get_cache(message: telebot.types.Message):
                 f"User {message.from_user.id} had gotten cache data. Result: {hidden_forward.message_forward_data}")
         except Exception as error:
             logger.info(error.with_traceback(None))
+
+
+"""
+@bot.message_handler(commands=['banuser'])
+def ban_user(message: telebot.types.Message):
+    logger.info(f"User {message.from_user.id} had entered /banuser command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /banuser command: {message.from_user.id}")
+        return
+    if message.from_user.id in sql.get_admins():
+        bans = sql.ban_user(get_user_id(message))
+        if not bans or len(bans) == 0:
+            bot.send_message(message.from_user.id, add_ban_error)
+            logger.info(f"Error at ban_user handler. User which to sent /banuser command: {message.from_user.id}")
+            return
+        bot.send_message(message.from_user.id, str(bans))
+        logger.info(f"User {message.from_user.id} had added a user at ban. Bans list: {bans}")
+"""
+
+"""
+@bot.message_handler(func=lambda message: message.from_user.id in sql.get_ban_list())
+def send_ban_handler(message: telebot.types.Message):
+    bot.send_message(message.from_user.id, ban_mess)
+    logger.info(f"It's help send_ban_handler. Message from ban-user {message.from_user.id}")
+"""
 
 
 @bot.message_handler(content_types=['sticker'])
