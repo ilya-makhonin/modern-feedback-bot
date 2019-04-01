@@ -53,7 +53,7 @@ def get_users():
         with connection.cursor() as cursor:
             cursor.execute('SELECT user_id FROM users;')
             users = cursor.fetchall()
-            return [user[0] for user in users]
+            return [user[0] for user in users] or []
     except Exception as error:
         sql_log.error(error.with_traceback(None))
         return False
@@ -67,7 +67,56 @@ def get_admins():
         with connection.cursor() as cursor:
             cursor.execute('SELECT admin_id FROM admins;')
             admins_id = cursor.fetchall()
-            return [admin_id[0] for admin_id in admins_id]
+            return [admin_id[0] for admin_id in admins_id] or []
+    except Exception as error:
+        sql_log.error(error.with_traceback(None))
+        return False
+    finally:
+        connection.close()
+
+
+"""
+Functions for ban and un-ban users by user_id. Don't work at this moment
+"""
+
+
+def ban_user(user_id):
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('INSERT INTO bans (user_id) VALUES (%s);', (user_id,))
+            cursor.execute('SELECT user_id FROM bans;')
+            users_bans = cursor.fetchall()
+            return [user_ban[0] for user_ban in users_bans] or []
+    except Exception as error:
+        sql_log.error(error.with_traceback(None))
+        return False
+    finally:
+        connection.close()
+
+
+def un_ban(user_id):
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('DELETE FROM bans WHERE user_id = %s;', (user_id,))
+            cursor.execute('SELECT user_id FROM bans;')
+            users_bans = cursor.fetchall()
+            return [user_ban[0] for user_ban in users_bans] or []
+    except Exception as error:
+        sql_log.error(error.with_traceback(None))
+        return False
+    finally:
+        connection.close()
+
+
+def get_ban_list():
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT user_id FROM bans;')
+            users_bans = cursor.fetchall()
+            return [user_ban[0] for user_ban in users_bans] or []
     except Exception as error:
         sql_log.error(error.with_traceback(None))
         return False
