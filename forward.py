@@ -3,6 +3,9 @@ from log import log
 
 
 class Forward:
+    """
+    This class needs to improve the communication method user_id <=> forward_message
+    """
     def __init__(self, develop_mode: bool):
         self.message_forward_data = dict()
         self.__develop_mode = develop_mode
@@ -20,6 +23,7 @@ class Forward:
             'first': message.from_user.first_name,
             'last': message.from_user.last_name
         }
+        # I have to find method is better
         self.message_forward_data[message.date] = new_key
         if self.__develop_mode:
             self.develop_debugging('add_key', f"Adding new key {message.date} => {str(new_key)}")
