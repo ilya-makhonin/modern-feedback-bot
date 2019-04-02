@@ -75,11 +75,6 @@ def get_admins():
         connection.close()
 
 
-"""
-Functions for ban and un-ban users by user_id. Don't work at this moment
-"""
-
-
 def ban_user(user_id):
     connection = get_connection()
     try:
