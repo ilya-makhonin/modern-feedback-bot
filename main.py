@@ -43,7 +43,7 @@ def flask_init(bot_object):
 def main(use_web_hook, logging_enable, logging_level):
     try:
         bot = create_bot_instance(logging_enable, logging_level)
-        timeout = 30 if hidden_forward.get_mode() else 14400
+        timeout = 120 if hidden_forward.get_mode() else 14400
         thread = threading.Thread(target=update_cache, name='CacheThread', args=[timeout])
         thread.setDaemon(True)
         thread.start()
@@ -63,4 +63,4 @@ def main(use_web_hook, logging_enable, logging_level):
 
 
 if __name__ == '__main__':
-    main(use_web_hook=True, logging_enable=True, logging_level='DEBUG')
+    main(use_web_hook=True, logging_enable=True, logging_level='INFO')
