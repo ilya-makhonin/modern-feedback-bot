@@ -31,17 +31,17 @@ class Forward:
 
     def get_id(self, message):
         try:
-            result: dict = self.message_forward_data.get(message.reply_to_message.forward_date, default=KeyError)
+            result: dict = self.message_forward_data.get(message.reply_to_message.forward_date)
             if self.__develop_mode:
                 self.develop_debugging('get_id', f"Getting id from {str(result)}")
             self.logger.info(f"Method get_id. Information: {result}")
-            return result.get('id', default=KeyError)
+            return result.get('id')
         except KeyError as error:
             self.logger.info(f"Error from get_key method. Information {error.with_traceback(None)}")
 
     def delete_data(self, message):
         try:
-            result = self.message_forward_data.pop(message.reply_to_message.date, default=KeyError)
+            result = self.message_forward_data.pop(message.reply_to_message.date)
             if self.__develop_mode:
                 self.develop_debugging(
                     'deleted_data',
