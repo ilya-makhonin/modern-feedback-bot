@@ -31,7 +31,7 @@ class Forward:
 
     def get_id(self, message):
         try:
-            result: dict = self.message_forward_data.get(message.reply_to_message.date, default=KeyError)
+            result: dict = self.message_forward_data.get(message.reply_to_message.forward_date, default=KeyError)
             if self.__develop_mode:
                 self.develop_debugging('get_id', f"Getting id from {str(result)}")
             self.logger.info(f"Method get_id. Information: {result}")
