@@ -80,6 +80,10 @@ def global_mailing(message: telebot.types.Message):
         return
     if message.from_user.id in sql.get_admins():
         text = (message.text[7:]).strip()
+        if text == '':
+            bot.send_message(message.from_user.id, global_error)
+            logger.info(f"Error global mailing. User {message.from_user.id} doesn't send a text")
+            return
         deleted_user = 0
         users = sql.get_users()
         if not users:
