@@ -108,7 +108,7 @@ def get_cache(message: telebot.types.Message):
         return
     if message.from_user.id in sql.get_admins():
         try:
-            if not os.path.exists('logs/'):
+            if not os.path.exists('cache/'):
                 os.mkdir('./cache/')
             with open('./cache/file.txt', 'w', encoding='utf8') as cache:
                 json.dump(hidden_forward.message_forward_data, cache, ensure_ascii=False, indent=2)
