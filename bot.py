@@ -11,7 +11,7 @@ import os
 
 bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
-hidden_forward = Forward(True)
+hidden_forward = Forward(False)
 
 
 def get_user_id(user_id, message: telebot.types.Message):
