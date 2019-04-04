@@ -112,7 +112,7 @@ def get_cache(message: telebot.types.Message):
                 os.mkdir('./cache/')
             with open('./cache/file.txt', 'w', encoding='utf8') as cache:
                 json.dump(hidden_forward.message_forward_data, cache, ensure_ascii=False, indent=2)
-            bot.send_document(message.from_user.id, cache)
+            bot.send_document(message.from_user.id, './cache/file.txt')
             logger.info(
                 f"User {message.from_user.id} had gotten cache data. Result: {hidden_forward.message_forward_data}")
         except Exception as error:
