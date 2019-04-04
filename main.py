@@ -7,7 +7,7 @@ from time import sleep
 from config import *
 
 
-logger_main = log('main', './main.log', 'WARNING')
+logger_main = log('main', 'main.log', 'WARNING')
 
 
 def update_cache(timeout: int):
@@ -42,20 +42,20 @@ def flask_init(bot_object):
 
 def main(use_web_hook, logging_enable, logging_level):
     try:
-        bot = create_bot_instance(logging_enable, logging_level)
+        _bot = create_bot_instance(logging_enable, logging_level)
         timeout = 120 if hidden_forward.get_mode() else 14400
         thread = threading.Thread(target=update_cache, name='CacheThread', args=[timeout])
         thread.setDaemon(True)
         thread.start()
         if use_web_hook:
             url = f"https://{HOST}:{PORT}/{TOKEN}/"
-            bot.remove_webhook()
+            _bot.remove_webhook()
             sleep(1)
-            bot.set_webhook(url=url, certificate=open(CERT, 'r'))
-            server = flask_init(bot)
+            _bot.set_webhook(url=url, certificate=open(CERT, 'r'))
+            server = flask_init(_bot)
             server.run(host=LISTEN, port=PORT, ssl_context=(CERT, KEY))
         else:
-            bot.polling(none_stop=True, interval=.5)
+            _bot.polling(none_stop=True, interval=.5)
     except Exception as error:
         print(error)
         logger_main.warning('bot crashed')
