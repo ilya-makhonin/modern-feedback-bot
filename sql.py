@@ -7,10 +7,22 @@ sql_log = log('sql', 'sql.log', 'ERROR')
 
 
 def get_connection():
+    """
+    Function for getting connection data
+    :return: <pymysql.connections.Connection>
+    """
     return pymysql.connections.Connection(host=HOSTD, user=USER, password=PASS, db=DB, charset='utf8mb4')
 
 
 def add_user(user_id, first_name, last_name, username):
+    """
+    Function for adding a user to DB
+    :param user_id: <int> - a id of a user
+    :param first_name: <str> or <None> - user's first name
+    :param last_name: <str> or <None> - user's last name
+    :param username: <str> or <None> - user's  nickname
+    :return: <bool>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -35,6 +47,10 @@ def add_user(user_id, first_name, last_name, username):
 
 
 def user_count():
+    """
+    Function for getting a count of users
+    :return: <int> or <boll: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -48,6 +64,10 @@ def user_count():
 
 
 def get_users():
+    """
+    Function for getting a list of users
+    :return: <list> like [<int>, <int>, <int>] or <bool: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -62,6 +82,10 @@ def get_users():
 
 
 def get_admins():
+    """
+    Function for getting list of admins
+    :return: <list> like [<int>, <int>, <int>] or <bool: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -75,7 +99,17 @@ def get_admins():
         connection.close()
 
 
+"""
+############################################ These function isn't using now ############################################
+"""
+
+
 def ban_user(user_id):
+    """
+    Function for banning a user
+    :param user_id: <int> - a id of a user
+    :return: <list> or <bool: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -91,6 +125,11 @@ def ban_user(user_id):
 
 
 def un_ban(user_id):
+    """
+    Function for unbanning a user
+    :param user_id: <int> - a id of a user
+    :return: <list> or <bool: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
@@ -106,6 +145,10 @@ def un_ban(user_id):
 
 
 def get_ban_list():
+    """
+    Function for getting list of users which in ban
+    :return: <list> or <bool: False>
+    """
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
