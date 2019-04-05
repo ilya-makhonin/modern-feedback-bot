@@ -15,6 +15,12 @@ hidden_forward = Forward(False)
 
 
 def get_user_id(user_id, message: telebot.types.Message):
+    """
+    ***************************** FOR UPDATE *****************************
+    :param user_id: <int> - a id of a user
+    :param message: <telebot.types.Message> - standard telegram message
+    :return: <int>
+    """
     if user_id is not False:
         return user_id
     if message.reply_to_message.forward_from is None:
@@ -24,6 +30,11 @@ def get_user_id(user_id, message: telebot.types.Message):
 
 @bot.message_handler(commands=['start'])
 def start_handler(message: telebot.types.Message):
+    """
+    ***************************** FOR UPDATE *****************************
+    Add a menu in callback - like ['Написать одному из админов', 'Вопросы по рекламе', 'Donation']
+    Text of menu most be in constants module
+    """
     adding = sql.add_user(
         message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
     if not adding:
@@ -39,6 +50,8 @@ def help_handler(message: telebot.types.Message):
     logger.info(f"It's help handler. Message from user {message.from_user.id}")
 
 
+# *************************************************** Admin's panel ***************************************************
+# *********************************************************************************************************************
 @bot.message_handler(commands=['helping'])
 def helping_handler(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /helping command")
@@ -127,6 +140,10 @@ def get_cache(message: telebot.types.Message):
 
 @bot.message_handler(commands=['banuser'])
 def ban_user(message: telebot.types.Message):
+    """
+    ***************************** FOR UPDATE *****************************
+    Handler for banning a user by id
+    """
     logger.info(f"User {message.from_user.id} had entered /banuser command")
     admins = sql.get_admins()
     if not admins:
@@ -150,6 +167,10 @@ def ban_user(message: telebot.types.Message):
 
 @bot.message_handler(commands=['unbanuser'])
 def un_ban_user(message: telebot.types.Message):
+    """
+    ***************************** FOR UPDATE *****************************
+    Handler for unbanning a user by id
+    """
     logger.info(f"User {message.from_user.id} had entered /unbanuser command")
     admins = sql.get_admins()
     if not admins:
@@ -175,8 +196,21 @@ def un_ban_user(message: telebot.types.Message):
         logger.info(f"User {message.from_user.id} had deleted a user from ban. Bans list: {un_bans}")
 
 
+"""
+*************************************** CREATE A HANDLER FOR GETTING APP CACHE ***************************************
+"""
+# *********************************************************************************************************************
+# *********************************************************************************************************************
+"""
+********************************** ADD HANDLERS FOR ADV, DONATION AND WRITE TO ADMIN **********************************
+"""
+
+
 @bot.message_handler(func=lambda message: message.from_user.id in sql.get_ban_list())
 def send_ban_handler(message: telebot.types.Message):
+    """
+    Handler for banned users
+    """
     bot.send_message(message.from_user.id, ban_mess)
     logger.info(f"It's help send_ban_handler. Message from ban-user {message.from_user.id}")
 
