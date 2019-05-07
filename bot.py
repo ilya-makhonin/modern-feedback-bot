@@ -69,7 +69,7 @@ def feedback_handler(message):
 def send_feedback(callback):
     user_id = callback.from_user.id
     bot.forward_message(CHAT, user_id, callback.message_id) # Я не знаю правильно ли это?
-    bot.send_message(CHAT, '#реклама')          #здесь должен быть chat_id того канала, где бот
+    bot.send_message(CHAT, '#реклама')
     bot.send_message(user_id, "Мы получили ваше сообщение!")
     bot.send_message(user_id, 'Главное меню', reply_markup=main_mark)
 
