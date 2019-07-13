@@ -29,18 +29,18 @@ def add_user(user_id, first_name, last_name, username):
             cursor.execute('SELECT * FROM users WHERE user_id = %s;', (user_id,))
             if cursor.fetchone() is None:
                 if username is not None and len(username) > 35:
-                    username = username[0:35]
-                if first_name is not None and len(first_name) > 50:
-                    first_name = first_name[0:35]
-                if last_name is not None and len(last_name) > 50:
-                    last_name = last_name[0:35]
+                    username = username[0:34]
+                if first_name is not None and len(first_name) > 35:
+                    first_name = first_name[0:34]
+                if last_name is not None and len(last_name) > 35:
+                    last_name = last_name[0:34]
                 cursor.execute(
                     'INSERT INTO `users` (user_id, username, first_name, last_name) VALUES (%s, %s, %s, %s);',
                     (user_id, username, first_name, last_name))
             connection.commit()
             return True
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Add user: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -57,7 +57,7 @@ def user_count():
             cursor.execute('SELECT COUNT(id) FROM users;')
             return cursor.fetchone()[0]
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'User count: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -75,7 +75,7 @@ def get_users():
             users = cursor.fetchall()
             return [user[0] for user in users] or []
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Get users: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -91,9 +91,9 @@ def get_admins():
         with connection.cursor() as cursor:
             cursor.execute('SELECT admin_id FROM admins;')
             admins_id = cursor.fetchall()
-            return [admin_id[0] for admin_id in admins_id] or []
+            return [admin_id[0] for admin_id in admins_id]
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Get andmins: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -113,12 +113,15 @@ def ban_user(user_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
+            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s', (user_id,))
+            if cursor.fetchone() is not None:
+                return False
             cursor.execute('INSERT INTO bans (user_id) VALUES (%s);', (user_id,))
             cursor.execute('SELECT user_id FROM bans;')
             users_bans = cursor.fetchall()
-            return [user_ban[0] for user_ban in users_bans] or []
+            return [user_ban[0] for user_ban in users_bans]
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Ban user: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -133,12 +136,15 @@ def un_ban(user_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
+            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s', (user_id,))
+            if cursor.fetchone() is None:
+                return False
             cursor.execute('DELETE FROM bans WHERE user_id = %s;', (user_id,))
             cursor.execute('SELECT user_id FROM bans;')
             users_bans = cursor.fetchall()
-            return [user_ban[0] for user_ban in users_bans] or []
+            return [user_ban[0] for user_ban in users_bans]
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Unban: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
@@ -154,9 +160,9 @@ def get_ban_list():
         with connection.cursor() as cursor:
             cursor.execute('SELECT user_id FROM bans;')
             users_bans = cursor.fetchall()
-            return [user_ban[0] for user_ban in users_bans] or []
+            return [user_ban[0] for user_ban in users_bans]
     except Exception as error:
-        sql_log.error(error.with_traceback(None))
+        sql_log.error(f'Get ban list: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
