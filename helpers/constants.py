@@ -21,6 +21,7 @@ global_error = 'Вы не отправили текст рассылки!'
 helping_mess = 'Вам доступны следующие команды:\n\n/usercount - количество ползователей бота (включая удалённых)\n' \
                '/global (mail text) - глобальная рассылка (подсчитывает количество удалённых пользователей)\n' \
                '/getfullcache - получить "слепок" кеша в txt формате\n/banuser [user_id or reply_to_message] - ' \
-               'Забанить пользователя\n/unbanuser [user_id or reply_to_message] - Разабанить пользователя'
+               'Забанить пользователя\n/unbanuser [user_id or reply_to_message] - Разабанить пользователя\n' \
+               '/getlogs - логи работы бота'
 
 

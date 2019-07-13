@@ -134,7 +134,7 @@ def get_logs(message: telebot.types.Message):
                 return
             file_list = os.listdir('logs/')
             for file in file_list:
-                doc = open(file, 'rb')
+                doc = open(f'logs/{file}', 'rb')
                 bot.send_document(message.from_user.id, doc)
                 doc.close()
             logger.info(f"User {message.from_user.id} had gotten logs. Result: {hidden_forward.message_forward_data}")
