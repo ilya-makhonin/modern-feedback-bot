@@ -39,7 +39,7 @@ def start_handler(message: telebot.types.Message):
     adding = sql.add_user(
         message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
     if not adding:
-        sql.sql_log.error(f"Error in start handler! User {message.from_user.id} did not have added to the bot")
+        logger.error(f"Error in start handler! User {message.from_user.id} did not have added to the bot")
         return
     bot.send_message(message.from_user.id, start_mess)
     logger.info(f"It's start handler. User {message.from_user.id} had added to the bot")
@@ -79,7 +79,6 @@ def send_feedback(callback):
 def make_donation(message):
     user_id = message.from_user.id
     bot.send_message(user_id, donate_mes)
-
 
 
 # *************************************************** Admin's panel ***************************************************
@@ -129,6 +128,7 @@ def global_mailing(message: telebot.types.Message):
             bot.send_message(message.from_user.id, global_error)
             logger.info(f"Error global mailing. User {message.from_user.id} doesn't send a text")
             return
+
         deleted_user = 0
         users = sql.get_users()
         if not users:
@@ -141,8 +141,8 @@ def global_mailing(message: telebot.types.Message):
                 logger.info(f"User {user} is using the bot. A message had sent successfully")
             except Exception as error:
                 deleted_user += 1
-                logger.info(f"User {user} is'nt using the bot. "
-                            f"Error in global mailing function: {error.with_traceback(None)}")
+                logger.error(f"User {user} is'nt using the bot. "
+                             f"Error in global mailing function: {error.with_traceback(None)}")
         bot.send_message(message.from_user.id, deleted_mess.format(deleted_user))
         logger.info(f"User {message.from_user.id} had sent global mailing. Text: {text}. Deleted user: {deleted_user}")
 
@@ -159,15 +159,15 @@ def get_cache(message: telebot.types.Message):
         try:
             if not os.path.exists('cache/'):
                 os.mkdir('./cache/')
-            with open('./cache/file.txt', 'w', encoding='utf8') as cache:
+            with open('./cache/cache.txt', 'w', encoding='utf8') as cache:
                 json.dump(hidden_forward.message_forward_data, cache, ensure_ascii=False, indent=2)
-            doc = open('./cache/file.txt', 'rb')
+            doc = open('./cache/cache.txt', 'rb')
             bot.send_document(message.from_user.id, doc)
             doc.close()
             logger.info(
                 f"User {message.from_user.id} had gotten cache data. Result: {hidden_forward.message_forward_data}")
         except Exception as error:
-            logger.info(error.with_traceback(None))
+            logger.error(error.with_traceback(None))
 
 
 @bot.message_handler(commands=['banuser'])
@@ -263,7 +263,7 @@ def sticker_handler(message: telebot.types.Message):
             bot.reply_to(message, success_mess)
             logger.info(f"Sticker handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in sticker handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in sticker handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(content_types=['photo'])
@@ -282,7 +282,7 @@ def images_handler(message: telebot.types.Message):
             bot.reply_to(message, success_mess)
             logger.info(f"Image handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in image handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in image handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(content_types=['document'])
@@ -301,7 +301,7 @@ def file_handler(message: telebot.types.Message):
             bot.reply_to(message, success_mess)
             logger.info(f"File handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in file handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in file handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(content_types=['audio'])
@@ -322,7 +322,7 @@ def audio_handler(message: telebot.types.Message):
             bot.send_message(message.from_user.id, other_mess)
             logger.info(f"Audio handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in audio handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in audio handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(content_types=['voice'])
@@ -341,7 +341,7 @@ def voice_handler(message: telebot.types.Message):
             bot.reply_to(message, success_mess)
             logger.info(f"Voice handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in voice handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in voice handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(content_types=['text'])
@@ -360,7 +360,7 @@ def text_handler(message: telebot.types.Message):
             bot.reply_to(message, success_mess)
             logger.info(f"Text handler. Message from a user. Info: {message}")
     except Exception as error:
-        logger.info(f"Exception in text handler. Info: {error.with_traceback(None)}")
+        logger.error(f"Exception in text handler. Info: {error.with_traceback(None)}")
 
 
 @bot.message_handler(func=lambda message: True)
