@@ -4,6 +4,7 @@ from log import log
 from constants import *
 from config import TOKEN, CHAT
 from forward import Forward
+from markup import create_markup
 import logging
 import json
 import os
@@ -13,7 +14,6 @@ bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
 hidden_forward = Forward(False)
 
-main_mark = create_markup(main_mark_buttons)
 
 def get_user_id(user_id, message: telebot.types.Message):
     """
@@ -49,36 +49,6 @@ def start_handler(message: telebot.types.Message):
 def help_handler(message: telebot.types.Message):
     bot.send_message(message.from_user.id, help_mess)
     logger.info(f"It's help handler. Message from user {message.from_user.id}")
-
-
-@bot.callback_query_handler(func=lambda callback: callback.data == "main_menu")
-@bot.message_handler(regexp="Главное меню")
-def main_menu(message):
-    user_id = message.from_user.id
-    bot.send_message(user_id, start_mes, reply_markup=main_mark)
-
-
-@bot.message_handler(commands=['advertisement'])
-@bot.message_handler(regexp="Реклама")
-def feedback_handler(message):
-    user_id = message.from_user.id
-    bot.send_message(user_id, ad_mess, reply_markup=create_markup(["Отмена"]))
-
-
-@bot.message_handler(func=lambda callback: True)
-def send_feedback(callback):
-    user_id = callback.from_user.id
-    bot.forward_message(CHAT, user_id, callback.message_id) # Я не знаю правильно ли это?
-    bot.send_message(CHAT, '#реклама')
-    bot.send_message(user_id, "Мы получили ваше сообщение!")
-    bot.send_message(user_id, 'Главное меню', reply_markup=main_mark)
-
-
-@bot.message_handler(commands=['donations'])
-@bot.message_handler(regexp="Сделать пожертвование")
-def make_donation(message):
-    user_id = message.from_user.id
-    bot.send_message(user_id, donate_mes)
 
 
 # *************************************************** Admin's panel ***************************************************
@@ -137,7 +107,7 @@ def global_mailing(message: telebot.types.Message):
             return
         for user in users:
             try:
-                bot.send_message(user, text)
+                bot.send_message(user, text, reply_markup='HTML')
                 logger.info(f"User {user} is using the bot. A message had sent successfully")
             except Exception as error:
                 deleted_user += 1

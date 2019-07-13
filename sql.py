@@ -93,7 +93,7 @@ def get_admins():
             admins_id = cursor.fetchall()
             return [admin_id[0] for admin_id in admins_id]
     except Exception as error:
-        sql_log.error(f'Get andmins: {error.with_traceback(None)}')
+        sql_log.error(f'Get admins: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()

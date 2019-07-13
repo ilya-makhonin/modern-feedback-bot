@@ -1,5 +1,6 @@
 from telebot import types
 
+
 def create_markup(buttons, row_width=1):
     """
     Создает клавиатуру с кнопками из списка buttons и шириной строк row
