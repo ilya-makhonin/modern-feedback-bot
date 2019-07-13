@@ -1,12 +1,13 @@
 import pymysql
 from helpers.log import log
+from helpers.utils import remove_emoji
 from config import HOSTD, USER, PASS, DB
 
 
 sql_log = log('sql', 'sql.log', 'ERROR')
 
 
-def get_connection():
+def get_connection() -> pymysql.Connection:
     """
     Function for getting connection data
     :return: <pymysql.connections.Connection>
@@ -24,6 +25,9 @@ def add_user(user_id, first_name, last_name, username):
     :return: <bool>
     """
     connection = get_connection()
+    first_name = remove_emoji(first_name)
+    last_name = remove_emoji(last_name)
+    username = remove_emoji(username)
     try:
         with connection.cursor() as cursor:
             cursor.execute('SELECT * FROM users WHERE user_id = %s;', (user_id,))
