@@ -1,5 +1,5 @@
 from telebot import types
-from log import log
+from helpers.log import log
 
 
 class Forward:

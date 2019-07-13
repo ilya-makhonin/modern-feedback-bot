@@ -1,5 +1,5 @@
 import pymysql
-from log import log
+from helpers.log import log
 from config import HOSTD, USER, PASS, DB
 
 
