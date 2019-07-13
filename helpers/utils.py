@@ -22,4 +22,3 @@ def create_buttons_list(arr):
             buttons.append(button_text)
 
         return create_markup(buttons)
-

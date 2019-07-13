@@ -1,10 +1,9 @@
 import telebot
-import sql
-from log import log
-from constants import *
+from helpers import sql
+from helpers.log import log
+from helpers.constants import *
 from config import TOKEN, CHAT
-from forward import Forward
-from markup import create_markup
+from helpers.forward import Forward
 import logging
 import json
 import os
@@ -15,27 +14,8 @@ logger = log('bot', 'bot.log', 'INFO')
 hidden_forward = Forward(False)
 
 
-def get_user_id(user_id, message: telebot.types.Message):
-    """
-    ***************************** FOR UPDATE *****************************
-    :param user_id: <int> - a id of a user
-    :param message: <telebot.types.Message> - standard telegram message
-    :return: <int>
-    """
-    if user_id is not False:
-        return user_id
-    if message.reply_to_message.forward_from is None:
-        return hidden_forward.get_id(message)
-    return message.reply_to_message.forward_from.id
-
-
 @bot.message_handler(commands=['start'])
 def start_handler(message: telebot.types.Message):
-    """
-    ***************************** FOR UPDATE *****************************
-    Add a menu in callback - like ['Написать одному из админов', 'Вопросы по рекламе', 'Donation']
-    Text of menu most be in constants module
-    """
     adding = sql.add_user(
         message.from_user.id, message.from_user.first_name, message.from_user.last_name, message.from_user.username)
     if not adding:
@@ -140,12 +120,30 @@ def get_cache(message: telebot.types.Message):
             logger.error(error.with_traceback(None))
 
 
+@bot.message_handler(commands=['getlogs'])
+def get_logs(message: telebot.types.Message):
+    logger.info(f"User {message.from_user.id} had entered /getlogs command")
+    admins = sql.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /getlogs command: {message.from_user.id}")
+        return
+    if message.from_user.id in sql.get_admins():
+        try:
+            if not os.path.exists('logs/'):
+                return
+            file_list = os.listdir('logs/')
+            for file in file_list:
+                doc = open(file, 'rb')
+                bot.send_document(message.from_user.id, doc)
+                doc.close()
+            logger.info(f"User {message.from_user.id} had gotten logs. Result: {hidden_forward.message_forward_data}")
+        except Exception as error:
+            logger.error(error.with_traceback(None))
+
+
 @bot.message_handler(commands=['banuser'])
 def ban_user(message: telebot.types.Message):
-    """
-    ***************************** FOR UPDATE *****************************
-    Handler for banning a user by id
-    """
     logger.info(f"User {message.from_user.id} had entered /banuser command")
     admins = sql.get_admins()
     if not admins:
@@ -153,26 +151,22 @@ def ban_user(message: telebot.types.Message):
         logger.info(f"Error getting list of admins. User which to send /banuser command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
-        user_id = (message.text.split(' '))
+        user_id = message.text[0:7].split(' ')
         if len(user_id) == 0:
-            user_id = False
-        else:
-            user_id = user_id[1].strip()
-        bans = sql.ban_user(get_user_id(user_id, message))
-        if not bans or len(bans) == 0:
-            bot.send_message(message.from_user.id, add_ban_error)
-            logger.info(f"Error at ban_user handler. User which to sent /banuser command: {message.from_user.id}")
             return
-        bot.send_message(message.from_user.id, str(bans))
-        logger.info(f"User {message.from_user.id} had added a user at ban. Bans list: {bans}")
+        result = sql.ban_user(int(user_id))
+        if not result:
+            bot.send_message(message.from_user.id, add_ban_error)
+            return
+        if len(result) == 0:
+            bot.send_message(message.from_user.id, clear_ban_mess)
+        else:
+            bot.send_message(message.from_user.id, str(result))
+        logger.info(f"User {message.from_user.id} had added a user at ban. Bans list: {result}")
 
 
 @bot.message_handler(commands=['unbanuser'])
 def un_ban_user(message: telebot.types.Message):
-    """
-    ***************************** FOR UPDATE *****************************
-    Handler for unbanning a user by id
-    """
     logger.info(f"User {message.from_user.id} had entered /unbanuser command")
     admins = sql.get_admins()
     if not admins:
@@ -180,39 +174,26 @@ def un_ban_user(message: telebot.types.Message):
         logger.info(f"Error getting list of admins. User which to send /unbanuser command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
-        user_id = (message.text.split(' '))
+        user_id = message.text[0:9].split(' ')
         if len(user_id) == 0:
-            user_id = False
-        else:
-            user_id = user_id[1].strip()
-        un_bans = sql.un_ban(get_user_id(user_id, message))
-        if len(un_bans) == 0 and un_bans is not False:
-            bot.send_message(message.from_user.id, clear_ban_mess)
-            logger.info(f"Ban-list is clear. User which to sent /unbanuser command: {message.from_user.id}")
             return
-        if not un_bans:
+        result = sql.un_ban(int(user_id))
+        if not result:
             bot.send_message(message.from_user.id, un_ban_error)
-            logger.info(f"Error at un_ban_user handler. User which to sent /unbanuser command: {message.from_user.id}")
             return
-        bot.send_message(message.from_user.id, str(un_bans))
-        logger.info(f"User {message.from_user.id} had deleted a user from ban. Bans list: {un_bans}")
+        if len(result) == 0:
+            bot.send_message(message.from_user.id, clear_ban_mess)
+        else:
+            bot.send_message(message.from_user.id, str(result))
+        logger.info(f"User {message.from_user.id} had removed a user at ban. Bans list: {result}")
 
 
-"""
-*************************************** CREATE A HANDLER FOR GETTING APP CACHE ***************************************
-"""
 # *********************************************************************************************************************
 # *********************************************************************************************************************
-"""
-********************************** ADD HANDLERS FOR ADV, DONATION AND WRITE TO ADMIN **********************************
-"""
 
 
 @bot.message_handler(func=lambda message: message.from_user.id in sql.get_ban_list())
 def send_ban_handler(message: telebot.types.Message):
-    """
-    Handler for banned users
-    """
     bot.send_message(message.from_user.id, ban_mess)
     logger.info(f"It's help send_ban_handler. Message from ban-user {message.from_user.id}")
 
@@ -230,6 +211,7 @@ def sticker_handler(message: telebot.types.Message):
         else:
             hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
+            bot.send_message(CHAT, message.from_user.id)
             bot.reply_to(message, success_mess)
             logger.info(f"Sticker handler. Message from a user. Info: {message}")
     except Exception as error:
@@ -249,6 +231,7 @@ def images_handler(message: telebot.types.Message):
         else:
             hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
+            bot.send_message(CHAT, message.from_user.id)
             bot.reply_to(message, success_mess)
             logger.info(f"Image handler. Message from a user. Info: {message}")
     except Exception as error:
@@ -268,6 +251,7 @@ def file_handler(message: telebot.types.Message):
         else:
             hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
+            bot.send_message(CHAT, message.from_user.id)
             bot.reply_to(message, success_mess)
             logger.info(f"File handler. Message from a user. Info: {message}")
     except Exception as error:
@@ -290,6 +274,7 @@ def audio_handler(message: telebot.types.Message):
                            caption=info_mess.format(message.from_user.first_name, message.from_user.username),
                            reply_to_message_id=message.from_user.id)
             bot.send_message(message.from_user.id, other_mess)
+            bot.send_message(CHAT, message.from_user.id)
             logger.info(f"Audio handler. Message from a user. Info: {message}")
     except Exception as error:
         logger.error(f"Exception in audio handler. Info: {error.with_traceback(None)}")
@@ -308,6 +293,7 @@ def voice_handler(message: telebot.types.Message):
         else:
             hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
+            bot.send_message(CHAT, message.from_user.id)
             bot.reply_to(message, success_mess)
             logger.info(f"Voice handler. Message from a user. Info: {message}")
     except Exception as error:
@@ -327,6 +313,7 @@ def text_handler(message: telebot.types.Message):
         else:
             hidden_forward.add_key(message)
             bot.forward_message(CHAT, message.chat.id, message.message_id)
+            bot.send_message(CHAT, message.from_user.id)
             bot.reply_to(message, success_mess)
             logger.info(f"Text handler. Message from a user. Info: {message}")
     except Exception as error:
