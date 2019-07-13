@@ -1,5 +1,5 @@
 from bot import create_bot_instance, hidden_forward
-from log import log
+from helpers.log import log
 import threading
 import telebot
 import flask
@@ -43,7 +43,7 @@ def flask_init(bot_object):
 def main(use_web_hook, logging_enable, logging_level):
     try:
         _bot = create_bot_instance(logging_enable, logging_level)
-        timeout = 120 if hidden_forward.get_mode() else 28800
+        timeout = 120 if hidden_forward.get_mode() else 43200
         thread = threading.Thread(target=update_cache, name='CacheThread', args=[timeout])
         thread.setDaemon(True)
         thread.start()
