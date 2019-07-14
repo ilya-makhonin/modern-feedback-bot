@@ -117,13 +117,12 @@ def ban_user(user_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s', (user_id,))
-            if cursor.fetchone() is not None:
+            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s;', (user_id,))
+            if cursor.fetchone() is not None or user_id in get_admins():
                 return False
             cursor.execute('INSERT INTO bans (user_id) VALUES (%s);', (user_id,))
-            cursor.execute('SELECT user_id FROM bans;')
-            users_bans = cursor.fetchall()
-            return [user_ban[0] for user_ban in users_bans]
+            connection.commit()
+            return get_ban_list()
     except Exception as error:
         sql_log.error(f'Ban user: {error.with_traceback(None)}')
         return False
@@ -140,13 +139,12 @@ def un_ban(user_id):
     connection = get_connection()
     try:
         with connection.cursor() as cursor:
-            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s', (user_id,))
+            cursor.execute('SELECT user_id FROM bans WHERE user_id = %s;', (user_id,))
             if cursor.fetchone() is None:
                 return False
             cursor.execute('DELETE FROM bans WHERE user_id = %s;', (user_id,))
-            cursor.execute('SELECT user_id FROM bans;')
-            users_bans = cursor.fetchall()
-            return [user_ban[0] for user_ban in users_bans]
+            connection.commit()
+            return get_ban_list()
     except Exception as error:
         sql_log.error(f'Unban: {error.with_traceback(None)}')
         return False
