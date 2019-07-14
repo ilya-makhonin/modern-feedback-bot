@@ -78,7 +78,6 @@ def global_mailing(message: telebot.types.Message):
             bot.send_message(message.from_user.id, global_error)
             logger.info(f"Error global mailing. User {message.from_user.id} doesn't send a text")
             return
-
         deleted_user = 0
         users = sql.get_users()
         if not users:
@@ -157,10 +156,15 @@ def ban_user(message: telebot.types.Message):
     if message.from_user.id in sql.get_admins():
         user_id = message.text[8:].strip()
         if len(user_id) == 0:
+            bot.send_message(message.from_user.id, enter_id_error)
+            logger.error(f'Error enter an user id for ban. Id is not defined!')
             return
         result = sql.ban_user(int(user_id))
         if not result:
             bot.send_message(message.from_user.id, add_ban_error)
+            logger.error(
+                'Error adding an user to ban list. User is on of admins or the user in list already or ' \
+                'this is other error with DB')
             return
         if len(result) == 0:
             bot.send_message(message.from_user.id, clear_ban_mess)
@@ -180,10 +184,15 @@ def un_ban_user(message: telebot.types.Message):
     if message.from_user.id in sql.get_admins():
         user_id = message.text[10:].strip()
         if len(user_id) == 0:
+            bot.send_message(message.from_user.id, enter_id_error)
+            logger.error(f'Error enter an user id for deleted from ban. Id is not defined!')
             return
         result = sql.un_ban(int(user_id))
         if not result:
             bot.send_message(message.from_user.id, un_ban_error)
+            logger.error(
+                'Error with delete an user from ban list. ' \
+                'The user is not in ban list or this is other error with DB')
             return
         if len(result) == 0:
             bot.send_message(message.from_user.id, clear_ban_mess)
