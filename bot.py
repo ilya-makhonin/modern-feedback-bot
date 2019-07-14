@@ -134,9 +134,13 @@ def get_logs(message: telebot.types.Message):
                 return
             file_list = os.listdir('logs/')
             for file in file_list:
-                doc = open(f'logs/{file}', 'rb')
-                bot.send_document(message.from_user.id, doc)
-                doc.close()
+                try:
+                    doc = open(f'logs/{file}', 'rb')
+                    bot.send_document(message.from_user.id, doc)
+                    doc.close()
+                except Exception as error:
+                    bot.send_message(message.from_user.id, f'File {file} is empty!')
+                    logger.warning(f'File {file} is empty. Error: {error}. User id {message.from_user.id}')
             logger.info(f"User {message.from_user.id} had gotten logs. Result: {hidden_forward.message_forward_data}")
         except Exception as error:
             logger.error(error.with_traceback(None))
@@ -151,7 +155,7 @@ def ban_user(message: telebot.types.Message):
         logger.info(f"Error getting list of admins. User which to send /banuser command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
-        user_id = message.text[0:7].split(' ')
+        user_id = message.text[8:].strip()
         if len(user_id) == 0:
             return
         result = sql.ban_user(int(user_id))
@@ -174,7 +178,7 @@ def un_ban_user(message: telebot.types.Message):
         logger.info(f"Error getting list of admins. User which to send /unbanuser command: {message.from_user.id}")
         return
     if message.from_user.id in sql.get_admins():
-        user_id = message.text[0:9].split(' ')
+        user_id = message.text[10:].strip()
         if len(user_id) == 0:
             return
         result = sql.un_ban(int(user_id))
