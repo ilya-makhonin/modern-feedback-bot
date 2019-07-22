@@ -52,7 +52,7 @@ def add_user(user_id, first_name, last_name, username):
 
 def user_count():
     """
-    Function for getting a count of users
+    Function for getting count of users
     :return: <int> or <boll: False>
     """
     connection = get_connection()
@@ -87,7 +87,7 @@ def get_users():
 
 def get_admins():
     """
-    Function for getting list of admins
+    Function for getting a list of admins
     :return: <list> like [<int>, <int>, <int>] or <bool: False>
     """
     connection = get_connection()
@@ -154,7 +154,7 @@ def un_ban(user_id):
 
 def get_ban_list():
     """
-    Function for getting list of users which in ban
+    Function for getting a list of users which are in ban
     :return: <list> or <bool: False>
     """
     connection = get_connection()

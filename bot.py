@@ -164,7 +164,7 @@ def ban_user(message: telebot.types.Message):
         if not result:
             bot.send_message(message.from_user.id, add_ban_error)
             logger.error(
-                'Error adding an user to ban list. User is on of admins or the user in list already or ' \
+                'Error adding an user to ban list. User is on of admins or the user in list already or '
                 'this is other error with DB')
             return
         if len(result) == 0:
