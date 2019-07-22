@@ -1,4 +1,6 @@
 from telebot import types
+from config import CHAT
+from helpers.sql import get_admins
 import re
 
 
@@ -29,3 +31,14 @@ def remove_emoji(string):
                                "\U000024C2-\U0001F251"
                                "]+", flags=re.UNICODE)
     return emoji_pattern.sub(r'', string)
+
+
+def send_to_chat(cache, bot, message, success):
+    cache.add_key(message)
+    bot.forward_message(CHAT, message.chat.id, message.message_id)
+    bot.send_message(CHAT, message.from_user.id)
+    bot.reply_to(message, success)
+
+
+def check_for_admin(message):
+    return message.from_user.id in get_admins()
