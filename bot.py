@@ -4,6 +4,7 @@ from helpers.log import log
 from helpers.constants import *
 from config import TOKEN, CHAT
 from helpers.forward import Forward
+from helpers.cache import Cache
 from helpers.utils import send_to_chat, check_for_admin
 import logging
 import json
@@ -13,6 +14,7 @@ import os
 bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
 hidden_forward = Forward(False)
+bot_cache = Cache(True)   # TODO: Внедрить модуль кеша в хандлеры бота
 
 
 @bot.message_handler(commands=['start'])
