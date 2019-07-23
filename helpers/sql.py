@@ -103,11 +103,6 @@ def get_admins():
         connection.close()
 
 
-"""
-############################################ These function isn't using now ############################################
-"""
-
-
 def ban_user(user_id):
     """
     Function for banning a user
