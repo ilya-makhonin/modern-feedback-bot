@@ -1,4 +1,4 @@
-from bot import create_bot_instance, hidden_forward
+from bot import create_bot_instance, hidden_forward, bot_cache
 from helpers.log import log
 import threading
 import telebot
@@ -14,6 +14,7 @@ def update_cache(timeout: int):
     try:
         while True:
             sleep(timeout)
+            bot_cache.update_cache()
             hidden_forward.clear_data()
     except Exception as err:
         logger_main.warning(err.with_traceback(None))
@@ -43,7 +44,8 @@ def flask_init(bot_object):
 def main(use_web_hook, logging_enable, logging_level):
     try:
         _bot = create_bot_instance(logging_enable, logging_level)
-        timeout = 120 if hidden_forward.get_mode() else 43200
+        # TODO: Как вариант, убрать многопоточность, так как весь кэш будет обновляться автоматически
+        timeout = 120 if hidden_forward.get_mode() else (60 * 60 * 24)
         thread = threading.Thread(target=update_cache, name='CacheThread', args=[timeout])
         thread.setDaemon(True)
         thread.start()
