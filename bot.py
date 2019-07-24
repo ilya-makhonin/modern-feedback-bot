@@ -14,7 +14,7 @@ import os
 bot = telebot.TeleBot(TOKEN)
 logger = log('bot', 'bot.log', 'INFO')
 hidden_forward = Forward(False)
-bot_cache = Cache(True)   # TODO: Внедрить модуль кеша в хандлеры бота
+bot_cache = Cache(True)
 
 
 @bot.message_handler(commands=['start'])
@@ -25,6 +25,7 @@ def start_handler(message: telebot.types.Message):
         logger.error(f"Error in start handler! User {message.from_user.id} did not have added to the bot")
         return
     bot.send_message(message.from_user.id, start_mess)
+    bot_cache.update_user_count()
     logger.info(f"It's start handler. User {message.from_user.id} had added to the bot")
 
 
@@ -39,12 +40,12 @@ def help_handler(message: telebot.types.Message):
 @bot.message_handler(commands=['helping'])
 def helping_handler(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /helping command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /helping command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         bot.send_message(message.from_user.id, helping_mess)
         logger.info(f"It's helping handler. Message from user {message.from_user.id}")
 
@@ -52,13 +53,13 @@ def helping_handler(message: telebot.types.Message):
 @bot.message_handler(commands=['usercount'])
 def get_user_count(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /usercount command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to sent /usercount command: {message.from_user.id}")
         return
-    if check_for_admin(message):
-        user_count = sql.user_count()
+    if check_for_admin(message, admins):
+        user_count = bot_cache.user_count()
         if not user_count:
             bot.send_message(message.from_user.id, user_count_error)
             logger.info(f"Error getting user's count. User which to sent /usercount command: {message.from_user.id}")
@@ -70,12 +71,12 @@ def get_user_count(message: telebot.types.Message):
 @bot.message_handler(commands=['global'])
 def global_mailing(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /global command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /global command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         text = (message.text[7:]).strip()
         if text == '':
             bot.send_message(message.from_user.id, global_error)
@@ -102,12 +103,12 @@ def global_mailing(message: telebot.types.Message):
 @bot.message_handler(commands=['getfullcache'])
 def get_cache(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /getfullcache command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /getfullcache command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         try:
             if not os.path.exists('cache/'):
                 os.mkdir('./cache/')
@@ -125,12 +126,12 @@ def get_cache(message: telebot.types.Message):
 @bot.message_handler(commands=['getlogs'])
 def get_logs(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /getlogs command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /getlogs command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         try:
             if not os.path.exists('logs/'):
                 return
@@ -151,12 +152,12 @@ def get_logs(message: telebot.types.Message):
 @bot.message_handler(commands=['banuser'])
 def ban_user(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /banuser command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /banuser command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         user_id = message.text[8:].strip()
         if len(user_id) == 0:
             bot.send_message(message.from_user.id, enter_id_error)
@@ -173,18 +174,19 @@ def ban_user(message: telebot.types.Message):
             bot.send_message(message.from_user.id, clear_ban_mess)
         else:
             bot.send_message(message.from_user.id, str(result))
+        bot_cache.update_user_ban_list(result)
         logger.info(f"User {message.from_user.id} had added a user at ban. Bans list: {result}")
 
 
 @bot.message_handler(commands=['unbanuser'])
 def un_ban_user(message: telebot.types.Message):
     logger.info(f"User {message.from_user.id} had entered /unbanuser command")
-    admins = sql.get_admins()
+    admins = bot_cache.get_admins()
     if not admins:
         bot.send_message(message.from_user.id, get_admins_error)
         logger.info(f"Error getting list of admins. User which to send /unbanuser command: {message.from_user.id}")
         return
-    if check_for_admin(message):
+    if check_for_admin(message, admins):
         user_id = message.text[10:].strip()
         if len(user_id) == 0:
             bot.send_message(message.from_user.id, enter_id_error)
@@ -201,14 +203,29 @@ def un_ban_user(message: telebot.types.Message):
             bot.send_message(message.from_user.id, clear_ban_mess)
         else:
             bot.send_message(message.from_user.id, str(result))
+        bot_cache.update_user_ban_list(result)
         logger.info(f"User {message.from_user.id} had removed a user at ban. Bans list: {result}")
 
 
+'''
+TODO: Have to add two new handlers: 
+one for adding a new admin to DataBase and one for deleting a some admin from DataBase
+'''
+
+
+@bot.message_handler(commands=['addadmin'])
+def add_admin(message: telebot.types.Message):
+    pass
+
+
+@bot.message_handler(commands=['deladmin'])
+def delete_admin(message: telebot.types.Message):
+    pass
 # *********************************************************************************************************************
 # *********************************************************************************************************************
 
 
-@bot.message_handler(func=lambda message: message.from_user.id in sql.get_ban_list())
+@bot.message_handler(func=lambda message: message.from_user.id in bot_cache.get_ban_list())
 def send_ban_handler(message: telebot.types.Message):
     bot.send_message(message.from_user.id, ban_mess)
     logger.info(f"It's help send_ban_handler. Message from ban-user {message.from_user.id}")
