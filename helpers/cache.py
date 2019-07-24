@@ -78,9 +78,13 @@ class Cache:
         self.admins_list = get_admins()
         self.logger.info('Updating ADMINS LIST prop has been success')
 
-    def update_user_ban_list(self):
+    def update_user_ban_list(self, new_data: list):
         if self.isUpdate:
             self.logger.info('Cache is updating! Updating BAN LIST prop was canceled')
+            return
+        if new_data:
+            self.users_ban_list = new_data
+            self.logger.info('From update_user_ban_list method. New data has been gotten')
             return
         if self.isClear:
             self.get_data()
