@@ -40,5 +40,5 @@ def send_to_chat(cache, bot, message, success):
     bot.reply_to(message, success)
 
 
-def check_for_admin(message):
-    return message.from_user.id in get_admins()
+def check_for_admin(message, admins):
+    return message.from_user.id in admins
