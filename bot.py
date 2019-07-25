@@ -215,7 +215,26 @@ one for adding a new admin to DataBase and one for deleting a some admin from Da
 
 @bot.message_handler(commands=['addadmin'])
 def add_admin(message: telebot.types.Message):
-    pass
+    logger.info(f"User {message.from_user.id} had entered /addadmin command")
+    admins = bot_cache.get_admins()
+    if not admins:
+        bot.send_message(message.from_user.id, get_admins_error)
+        logger.info(f"Error getting list of admins. User which to send /addadmin command: {message.from_user.id}")
+        return
+    if check_for_admin(message, admins):
+        new_admin_id = message.text[10:].strip()
+        if len(new_admin_id) == 0:
+            bot.send_message(message.from_user.id, enter_id_error)
+            logger.error(f'Error enter an user id for ban. Id is not defined!')
+            return
+        result = sql.add_admin(int(new_admin_id))
+        if not result:
+            bot.send_message(message.from_user.id, add_admin_error)
+            logger.error('Error adding an user to admin list. User is an admins or this is other error with DB')
+            return
+        bot_cache.update_admins_list()
+        bot.send_message(message.from_user.id, 'Some text about success!')
+        logger.info(f"User {message.from_user.id} had added a user at admin list.")
 
 
 @bot.message_handler(commands=['deladmin'])
