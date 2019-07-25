@@ -85,6 +85,7 @@ def get_users():
         connection.close()
 
 
+# ********************************************* Testing block *********************************************
 def get_admins():
     """
     Function for getting a list of admins
@@ -98,6 +99,43 @@ def get_admins():
             return [admin_id[0] for admin_id in admins_id]
     except Exception as error:
         sql_log.error(f'Get admins: {error.with_traceback(None)}')
+        return False
+    finally:
+        connection.close()
+
+
+def add_admin(user_id):
+    # TODO: Have to review and test the function
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT user_id FROM admins WHERE user_id = %s;', (user_id,))
+            if cursor.fetchone() is None:
+                return False
+            cursor.execute('DELETE FROM admins WHERE user_ud = %s;', (user_id,))
+            connection.commit()
+            return True
+    except Exception as error:
+        sql_log.error(f'Delete admin error: {error.with_traceback(None)}')
+        return False
+    finally:
+        connection.close()
+# *********************************************************************************************************
+
+
+def delete_admin(user_id):
+    # TODO: Have to review and test the function
+    connection = get_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute('SELECT user_id FROM admins WHERE user_id = %s;', (user_id,))
+            if cursor.fetchone() is not None:
+                return False
+            cursor.execute('INSERT INTO admins (user_id) VALUES (%s);', (user_id,))
+            connection.commit()
+            return True
+    except Exception as error:
+        sql_log.error(f'Add admin error: {error.with_traceback(None)}')
         return False
     finally:
         connection.close()
