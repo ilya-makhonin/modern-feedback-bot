@@ -1,6 +1,6 @@
 from telebot import types
 from config import CHAT
-from helpers.sql import get_admins
+# from helpers.sql import get_admins
 import re
 
 
